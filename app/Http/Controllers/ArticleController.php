@@ -24,6 +24,10 @@ class ArticleController extends Controller
         return response()->json(new ArticleResource($article), 200);
     }
 
+
+    public function image(Article $article) {
+        return response()->download(public_path(Storage::url($article->image)), $article->title);
+}
     public function store(Request $request){
 
 
@@ -48,11 +52,17 @@ class ArticleController extends Controller
         $request->validate([
             'title' => 'required|string|unique:articles,title,'.$article->id.'|max:255',
             'body' => 'required',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'required|image|dimensions:min_width=200,min_height=200',
         ], self::$messages);
-        $article->update($request->all());
+       // $article->update($request->all());
 
-        return response()->json($article, 200);
+        $article = new Article($request->all());
+        $path = $request->image->store('public/articles');
+
+        $article->image = $path;
+        $article->save();
+        return response()->json(new ArticleResource($article), 200);
     }
 
     public function delete(Request $request, Article $article){
