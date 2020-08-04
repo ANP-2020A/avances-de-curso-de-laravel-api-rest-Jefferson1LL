@@ -1,7 +1,9 @@
 <?php
 
+use App\Admin;
 use App\Category;
 use App\User;
+use App\Writer;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,21 +26,30 @@ class UsersTableSeeder extends Seeder
         //no se vuelva lento
         $password = Hash::make('123123');
 
-        User::create([
+
+
+        $admin = Admin::create(['credential_number' => '111111']);
+        $admin->user()->create([
             'name' => 'Administrador',
             'email' => 'admin@prueba.com',
             'password' => $password,
+            'role' => 'ROLE_SUPERADMIN',
         ]);
 
         //generar algunos usuarios para nuestra aplicacion
         for ($i = 0; $i < 10; $i++){
-           $user =  User::create([
+            $writer = Writer::create([
+                'editorial' => $faker->company,
+                'short_bio' => $faker->paragraph
+            ]);
+
+           $writer->user()->create([
                 'name' => $faker->name,
                 'email' => $faker->email,
                 'password' => $password,
             ]);
 
-            $user->categories()->saveMany(
+            $writer->user->categories()->saveMany(
                 $faker->randomElements(
                     array(
                         Category::find(1),
